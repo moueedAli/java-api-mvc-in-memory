@@ -45,7 +45,7 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     public Product create(@RequestBody Product product) {
 
-        if (this.productRepository.findAll().get(product.getId()).getName() == product.getName()) {
+        if (productRepository.checkName(product.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not created");
         }
 
@@ -57,7 +57,7 @@ public class ProductController {
     @ResponseStatus(HttpStatus.CREATED)
     public Product update(@PathVariable(name = "id") int id, @RequestBody Product product) {
 
-        if (Objects.equals(this.productRepository.findAll().get(id).getName(), product.getName())) {
+        if (productRepository.checkName(product.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product exists already");
         }
         else if (id < this.productRepository.size()) {
@@ -81,15 +81,4 @@ public class ProductController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not found");
         }
     }
-
-//    @GetMapping("{id}")
-//    public Author getOne(@PathVariable int id) {
-//        Author author = this.authorRepository.getOne(id);
-//
-//        if (author == null) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
-//        }
-//
-//        return author;
-//    }
 }

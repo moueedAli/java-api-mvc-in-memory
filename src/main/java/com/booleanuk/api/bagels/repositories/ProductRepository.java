@@ -4,6 +4,7 @@ import com.booleanuk.api.bagels.models.Product;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ProductRepository {
     private List<Product> products;
@@ -35,5 +36,14 @@ public class ProductRepository {
 
     public int size() {
         return products.size();
+    }
+
+    public boolean checkName(String name) {
+        for (Product p: products) {
+            if (Objects.equals(p.getName(), name)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
