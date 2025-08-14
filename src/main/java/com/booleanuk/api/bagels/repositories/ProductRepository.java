@@ -29,8 +29,8 @@ public class ProductRepository {
         return null;
     }
 
-    public void addProduct(Product p) {
-        products.add(p);
+    public boolean addProduct(Product p) {
+        return products.add(p);
     }
 
     public int size() {

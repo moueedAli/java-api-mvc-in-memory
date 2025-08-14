@@ -2,10 +2,13 @@ package com.booleanuk.api.bagels.controller;
 
 import com.booleanuk.api.bagels.models.Product;
 import com.booleanuk.api.bagels.repositories.ProductRepository;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("products")
@@ -18,17 +21,34 @@ public class ProductController {
 
     @GetMapping
     public List<Product> getAll() {
-        return this.productRepository.findAll();
+        List<Product> products =  this.productRepository.findAll();
+
+        if (products.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not products were found");
+        }
+
+        return products;
     }
 
     @GetMapping("{id}")
     public Product getOne(@PathVariable int id) {
-        return this.productRepository.getOne(id);
+        Product product =  this.productRepository.getOne(id);
+
+        if (product == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product is not found");
+        }
+
+        return product;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Product create(@RequestBody Product product) {
+
+        if (this.productRepository.findAll().get(product.getId()).getName() == product.getName()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product not created");
+        }
+
         this.productRepository.addProduct(product);
         return product;
     }
@@ -36,11 +56,18 @@ public class ProductController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.CREATED)
     public Product update(@PathVariable(name = "id") int id, @RequestBody Product product) {
-        if (id < this.productRepository.size()) {
+
+        if (Objects.equals(this.productRepository.findAll().get(id).getName(), product.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product exists already");
+        }
+        else if (id < this.productRepository.size()) {
             this.productRepository.findAll().get(id).setId(id);
             this.productRepository.findAll().get(id).setName(product.getName());
             this.productRepository.findAll().get(id).setCategory(product.getCategory());
             this.productRepository.findAll().get(id).setPrice(product.getPrice());
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product does not exist");
         }
         return null;
     }
@@ -50,6 +77,19 @@ public class ProductController {
         if (id < this.productRepository.size()) {
             return this.productRepository.findAll().remove(id);
         }
-        return null;
+        else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not found");
+        }
     }
+
+//    @GetMapping("{id}")
+//    public Author getOne(@PathVariable int id) {
+//        Author author = this.authorRepository.getOne(id);
+//
+//        if (author == null) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found");
+//        }
+//
+//        return author;
+//    }
 }
